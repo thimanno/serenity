@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Serenity — paz mental diária</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0D0F1A; --bg2:#141627; --bg3:#1C2038;
+  --surface:#1A1D30; --surface2:#212440;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#F0EEF8; --text2:#9B97B8; --text3:#5C587A;
+  --purple:#8B7FF0; --purple2:#6B5ED4;
+  --purple-light:rgba(139,127,240,0.15); --purple-glow:rgba(139,127,240,0.25);
+  --teal:#5EC4C0; --teal-light:rgba(94,196,192,0.12);
+  --gold:#D4A96A; --gold-light:rgba(212,169,106,0.15);
+  --green:#5EC480; --green-light:rgba(94,196,128,0.12);
+  --r:18px; --r-sm:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;overflow-x:hidden;}
+.phone{width:100%;max-width:430px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.ambient{position:fixed;top:-120px;left:50%;transform:translateX(-50%);width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(139,127,240,0.18) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.ambient2{position:fixed;bottom:0;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(94,196,192,0.1) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;position:relative;z-index:2;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--text);letter-spacing:0.5px;}
+.logo span{color:var(--purple);font-style:italic;}
+.streak-pill{display:flex;align-items:center;gap:6px;background:var(--purple-light);border:1px solid var(--purple-glow);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--purple);}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;padding:0 24px 110px;position:relative;z-index:2;overflow-y:auto;}
+.screen.active{display:flex;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* --- LOGIN SCREEN --- */
+.login-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 32px;z-index:2;position:relative;}
+.login-screen.active{display:flex;}
+.login-orb{width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(139,127,240,0.5) 0%,rgba(94,196,192,0.2) 100%);border:1.5px solid rgba(139,127,240,0.4);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;box-shadow:0 0 40px rgba(139,127,240,0.3);animation:pulseOrb 3s ease-in-out infinite;}
+@keyframes pulseOrb{0%,100%{box-shadow:0 0 40px rgba(139,127,240,0.3)}50%{box-shadow:0 0 60px rgba(139,127,240,0.5)}}
+.login-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:400;color:var(--text);text-align:center;line-height:1.2;margin-bottom:10px;}
+.login-title em{font-style:italic;color:var(--purple);}
+.login-sub{font-size:15px;color:var(--text2);font-weight:300;text-align:center;line-height:1.7;margin-bottom:40px;max-width:280px;}
+.google-btn{width:100%;max-width:320px;display:flex;align-items:center;justify-content:center;gap:12px;padding:15px 24px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);font-size:15px;font-weight:500;color:var(--text);cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.google-btn:hover{background:var(--surface2);border-color:var(--purple-glow);transform:translateY(-1px);}
+.google-btn svg{width:20px;height:20px;flex-shrink:0;}
+.guest-btn{width:100%;max-width:320px;padding:13px;background:none;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;color:var(--text3);cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.guest-btn:hover{color:var(--text2);border-color:var(--border2);}
+.login-terms{font-size:11px;color:var(--text3);text-align:center;margin-top:24px;line-height:1.6;max-width:260px;}
+
+/* --- USER BAR (logged in) --- */
+.user-bar{display:flex;align-items:center;gap:10px;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--purple-light);border:1.5px solid var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--purple);overflow:hidden;cursor:pointer;}
+.user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+/* --- PAYWALL SCREEN --- */
+.paywall-screen{display:none;flex-direction:column;padding:32px 24px 100px;position:relative;z-index:2;overflow-y:auto;}
+.paywall-screen.active{display:flex;animation:fadeUp .3s ease;}
+.paywall-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-light);border:1px solid rgba(212,169,106,0.3);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--gold);margin-bottom:20px;align-self:flex-start;}
+.paywall-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:400;color:var(--text);line-height:1.25;margin-bottom:10px;}
+.paywall-title em{font-style:italic;color:var(--purple);}
+.paywall-sub{font-size:14px;color:var(--text2);font-weight:300;line-height:1.7;margin-bottom:28px;}
+.features-list{display:flex;flex-direction:column;gap:12px;margin-bottom:28px;}
+.feature-item{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2);font-weight:300;}
+.feature-check{width:24px;height:24px;border-radius:50%;background:var(--green-light);border:1px solid rgba(94,196,128,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.plan-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.plan-card{padding:18px 20px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .2s;position:relative;}
+.plan-card.selected{border-color:var(--purple);background:var(--purple-light);}
+.plan-card.popular{border-color:rgba(212,169,106,0.4);}
+.plan-popular-tag{position:absolute;top:-1px;right:16px;background:var(--gold);color:var(--bg);font-size:10px;font-weight:600;padding:3px 10px;border-radius:0 0 8px 8px;letter-spacing:.05em;}
+.plan-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.plan-price{display:flex;align-items:baseline;gap:4px;}
+.plan-price-val{font-family:'Playfair Display',serif;font-size:28px;color:var(--text);}
+.plan-price-period{font-size:13px;color:var(--text3);}
+.plan-desc{font-size:12px;color:var(--text3);margin-top:4px;}
+.plan-saving{font-size:11px;font-weight:500;color:var(--green);margin-top:4px;}
+.trial-note{text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px;font-weight:300;}
+.trial-note strong{color:var(--teal);}
+.restore-btn{background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;text-align:center;font-family:'Inter',sans-serif;padding:8px;display:block;margin:0 auto;}
+.restore-btn:hover{color:var(--text2);}
+
+/* --- FREE LIMIT BANNER --- */
+.limit-banner{background:linear-gradient(135deg,#2D1A10 0%,#1A1010 100%);border:1px solid rgba(212,169,106,0.3);border-radius:var(--r);padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;cursor:pointer;}
+.limit-icon{font-size:22px;flex-shrink:0;}
+.limit-info p:first-child{font-size:13px;font-weight:500;color:var(--gold);}
+.limit-info p:last-child{font-size:12px;color:var(--text3);margin-top:2px;}
+.limit-arrow{margin-left:auto;font-size:16px;color:var(--text3);}
+
+/* HOME */
+.home-top{margin-top:28px;margin-bottom:24px;}
+.home-time{font-size:12px;color:var(--text3);font-weight:300;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.home-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:400;line-height:1.2;color:var(--text);}
+.home-title em{font-style:italic;color:var(--purple);}
+.week-row{display:flex;gap:6px;margin-bottom:24px;}
+.wday{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.wday-lbl{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.06em;}
+.wday-dot{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);transition:all .25s;}
+.wday-dot.done{background:var(--purple2);border-color:var(--purple);color:#fff;font-size:13px;}
+.wday-dot.today{border:1.5px solid var(--purple);background:var(--purple-light);color:var(--purple);font-size:9px;font-weight:600;}
+.hero-card{border-radius:var(--r);padding:28px 24px;margin-bottom:16px;cursor:pointer;position:relative;overflow:hidden;background:linear-gradient(135deg,#2D2060 0%,#1A1640 60%,#0F1530 100%);border:1px solid rgba(139,127,240,0.3);transition:transform .2s;}
+.hero-card:hover{transform:translateY(-2px);}
+.hero-card:active{transform:scale(.98);}
+.hero-card-glow{position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(139,127,240,0.4) 0%,transparent 70%);pointer-events:none;}
+.hero-orb{position:absolute;bottom:-20px;right:20px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(94,196,192,0.2) 0%,transparent 70%);}
+.hero-tag{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:10px;opacity:.85;}
+.hero-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:400;color:#fff;line-height:1.3;margin-bottom:20px;}
+.hero-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:8px 18px;font-size:13px;font-weight:500;color:#fff;cursor:pointer;transition:background .2s;}
+.hero-btn:hover{background:rgba(255,255,255,0.18);}
+.hero-btn svg{width:14px;height:14px;}
+.chart-card{background:var(--surface);border-radius:var(--r);padding:18px 20px;margin-bottom:16px;border:1px solid var(--border);}
+.card-title{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px;}
+.mini-bars{display:flex;align-items:flex-end;gap:6px;height:52px;}
+.mini-bar{flex:1;border-radius:4px;background:var(--bg3);min-height:6px;}
+.mini-bar.filled{background:var(--purple2);opacity:.7;}
+.mini-bar.today-bar{background:var(--purple);opacity:1;}
+.mini-bar-labels{display:flex;gap:6px;margin-top:6px;}
+.mini-bar-lbl{flex:1;text-align:center;font-size:9px;color:var(--text3);}
+.qa-title{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:10px;}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.qa-card{background:var(--surface);border-radius:var(--r-sm);padding:16px 14px;border:1px solid var(--border);cursor:pointer;transition:all .2s;}
+.qa-card:hover{background:var(--surface2);border-color:var(--border2);transform:translateY(-1px);}
+.qa-icon{font-size:24px;margin-bottom:10px;}
+.qa-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.qa-dur{font-size:11px;color:var(--text3);}
+
+/* CHECKIN */
+.screen-header{margin-top:28px;margin-bottom:24px;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;margin-bottom:18px;transition:color .2s;font-family:'Inter',sans-serif;}
+.back-btn:hover{color:var(--text2);}
+.back-btn svg{width:16px;height:16px;}
+.screen-ttl{font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:var(--text);line-height:1.25;margin-bottom:8px;}
+.screen-sub{font-size:14px;color:var(--text2);font-weight:300;line-height:1.6;}
+.section-lbl{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin:20px 0 10px;}
+.mood-row{display:flex;gap:8px;}
+.mood-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .2s;font-size:22px;}
+.mood-btn span{font-size:10px;color:var(--text3);font-family:'Inter',sans-serif;}
+.mood-btn.sel{border-color:var(--purple);background:var(--purple-light);}
+.mood-btn.sel span{color:var(--purple);}
+.energy-wrap{margin:6px 0 4px;}
+.energy-track{display:flex;align-items:center;gap:12px;}
+.energy-lbl{font-size:11px;color:var(--text3);white-space:nowrap;}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;background:var(--bg3);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--purple);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--purple-glow),0 2px 8px rgba(139,127,240,0.4);cursor:pointer;}
+.energy-val{font-size:13px;font-weight:500;color:var(--purple);min-width:18px;text-align:right;}
+.energy-sub{font-size:11px;color:var(--text3);margin-top:6px;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:14px;color:var(--text2);font-weight:300;transition:all .2s;}
+.opt-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0;}
+.opt.sel{border-color:var(--purple);background:var(--purple-light);color:var(--text);}
+
+/* BUTTONS */
+.btn{width:100%;padding:15px;border-radius:var(--r-sm);border:none;font-family:'Inter',sans-serif;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-bottom:10px;letter-spacing:.01em;}
+.btn-primary{background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);color:#fff;box-shadow:0 4px 20px rgba(139,127,240,0.35);}
+.btn-primary:hover{box-shadow:0 6px 24px rgba(139,127,240,0.5);transform:translateY(-1px);}
+.btn-primary:active{transform:scale(.98);box-shadow:none;}
+.btn-primary:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none;}
+.btn-ghost{background:var(--surface);color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-gold{background:linear-gradient(135deg,#C89040 0%,#A07030 100%);color:#fff;box-shadow:0 4px 20px rgba(212,169,106,0.3);}
+.btn-gold:hover{box-shadow:0 6px 24px rgba(212,169,106,0.5);transform:translateY(-1px);}
+
+/* EXERCICIO */
+.ex-tag-pill{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;background:var(--purple-light);color:var(--purple);border:1px solid var(--purple-glow);padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+.ex-ttl{font-family:'Playfair Display',serif;font-size:26px;font-weight:400;color:var(--text);line-height:1.3;margin-bottom:20px;}
+.ex-body-card{background:var(--surface);border-radius:var(--r);padding:22px;margin-bottom:16px;border:1px solid var(--border);font-size:15px;color:var(--text2);line-height:1.8;font-weight:300;white-space:pre-wrap;}
+.breath-section{display:flex;flex-direction:column;align-items:center;margin:8px 0 20px;}
+.breath-orb{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(139,127,240,0.4) 0%,rgba(107,94,212,0.15) 60%,transparent 100%);border:1.5px solid rgba(139,127,240,0.4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:400;color:var(--purple);cursor:pointer;transition:transform .9s cubic-bezier(.4,0,.2,1),box-shadow .9s;margin-bottom:16px;user-select:none;text-align:center;line-height:1.4;box-shadow:0 0 30px rgba(139,127,240,0.15);}
+.breath-orb.expand{transform:scale(1.35);box-shadow:0 0 60px rgba(139,127,240,0.4);border-color:var(--purple);color:#fff;}
+.breath-phase{font-size:14px;color:var(--text2);text-align:center;font-weight:300;}
+.breath-cycles{font-size:12px;color:var(--text3);margin-top:4px;}
+.reflect-card{background:var(--surface);border-radius:var(--r);padding:20px;margin-bottom:16px;border:1px solid var(--border);}
+.reflect-q{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--text);line-height:1.4;margin-bottom:14px;font-style:italic;}
+textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);resize:none;min-height:110px;outline:none;transition:border-color .2s;line-height:1.65;font-weight:300;}
+textarea:focus{border-color:var(--purple);}
+textarea::placeholder{color:var(--text3);}
+
+/* COMPLETO */
+.complete-area{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:40px;margin-bottom:32px;}
+.complete-orb{width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(139,127,240,0.5) 0%,rgba(94,196,192,0.2) 100%);border:1.5px solid rgba(139,127,240,0.4);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px;box-shadow:0 0 40px rgba(139,127,240,0.3);animation:popOrb .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popOrb{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.complete-ttl{font-family:'Playfair Display',serif;font-size:30px;font-weight:400;color:var(--text);margin-bottom:10px;}
+.complete-sub{font-size:14px;color:var(--text2);font-weight:300;line-height:1.7;max-width:280px;}
+.streak-card{background:linear-gradient(135deg,#1E1A40 0%,#141030 100%);border-radius:var(--r);padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:14px;border:1px solid rgba(139,127,240,0.25);}
+.streak-card-icon{font-size:30px;}
+.streak-card-info p:first-child{font-size:12px;color:var(--text3);margin-bottom:2px;}
+.streak-card-info p:last-child{font-size:16px;font-weight:500;color:var(--purple);}
+.insight-card{background:var(--surface);border-radius:var(--r);padding:20px;margin-bottom:14px;border:1px solid var(--border);border-left:2px solid var(--teal);}
+.insight-lbl{font-size:10px;font-weight:500;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+.insight-txt{font-size:15px;color:var(--text2);line-height:1.7;font-weight:300;font-style:italic;white-space:pre-wrap;}
+
+/* HISTORICO */
+.hist-list{display:flex;flex-direction:column;gap:10px;}
+.hist-item{background:var(--surface);border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+.hist-emoji{font-size:24px;width:40px;text-align:center;flex-shrink:0;}
+.hist-info{flex:1;}
+.hist-date{font-size:11px;color:var(--text3);margin-bottom:3px;}
+.hist-note{font-size:13px;color:var(--text2);font-weight:300;}
+.hist-badge{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--purple-light);color:var(--purple);font-weight:500;white-space:nowrap;}
+
+/* PERFIL */
+.profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;margin:32px 0 28px;}
+.profile-avatar-lg{width:72px;height:72px;border-radius:50%;background:var(--purple-light);border:2px solid var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:14px;overflow:hidden;}
+.profile-avatar-lg img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.profile-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--text);margin-bottom:4px;}
+.profile-email{font-size:13px;color:var(--text3);}
+.profile-plan{display:inline-flex;align-items:center;gap:6px;background:var(--gold-light);border:1px solid rgba(212,169,106,0.3);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:500;color:var(--gold);margin-top:10px;}
+.profile-plan.free{background:var(--surface);border-color:var(--border);color:var(--text3);}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border-radius:var(--r-sm);padding:14px;border:1px solid var(--border);text-align:center;}
+.stat-val{font-family:'Playfair Display',serif;font-size:24px;color:var(--purple);margin-bottom:2px;}
+.stat-lbl{font-size:11px;color:var(--text3);}
+.profile-section{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin:20px 0 10px;}
+.profile-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:background .2s;}
+.profile-item:hover{background:var(--surface2);}
+.profile-item-icon{font-size:18px;width:28px;text-align:center;}
+.profile-item-label{flex:1;font-size:14px;color:var(--text2);}
+.profile-item-arrow{font-size:16px;color:var(--text3);}
+.logout-btn{width:100%;padding:14px;background:none;border:1px solid rgba(224,112,112,0.3);border-radius:var(--r-sm);font-size:14px;color:var(--danger);cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;transition:all .2s;}
+.logout-btn:hover{background:rgba(224,112,112,0.08);}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;}
+.loading-overlay.visible{opacity:1;pointer-events:all;}
+.loading-orb-wrap{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,rgba(139,127,240,0.5) 0%,transparent 70%);animation:pulseOrbLoad 2s ease-in-out infinite;}
+@keyframes pulseOrbLoad{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}}
+.loading-txt{font-size:14px;color:var(--text2);font-weight:300;letter-spacing:.02em;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(13,15,26,0.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:10px 0 20px;z-index:100;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:10px;font-weight:500;letter-spacing:.04em;padding:6px 0;transition:color .2s;font-family:'Inter',sans-serif;}
+.nav-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.nav-btn.active{color:var(--purple);}
+.center-icon{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(139,127,240,0.5);margin-bottom:2px;}
+.center-icon svg{stroke:#fff;}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="ambient2"></div>
+
+<div class="phone">
+  <div class="loading-overlay" id="loading">
+    <div class="loading-orb-wrap"></div>
+    <div class="loading-txt" id="loading-txt">Preparando sua pausa...</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="s-login" class="login-screen active">
+    <div class="login-orb">🌿</div>
+    <div class="login-title">Bem-vindo ao<br><em>Serenity</em></div>
+    <div class="login-sub">Sua pausa diária de bem-estar, personalizada pela inteligência artificial.</div>
+    <button class="google-btn" onclick="loginGoogle()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Entrar com Google
+    </button>
+    <button class="guest-btn" onclick="loginGuest()">Continuar sem conta (3 pausas grátis)</button>
+    <div class="login-terms">Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade.</div>
+  </div>
+
+  <!-- TOPBAR (app) -->
+  <div class="topbar" id="topbar" style="display:none">
+    <div class="logo">Seren<span>ity</span></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="streak-pill">🔥 <span id="streak-num">0</span> dias</div>
+      <div class="user-avatar" id="user-avatar" onclick="goNav('s-perfil','nav-perfil')">?</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="s-home" class="screen">
+    <div class="home-top">
+      <div class="home-time" id="home-time">bom dia</div>
+      <div class="home-title">Como você está<br><em>hoje?</em></div>
+    </div>
+    <div class="week-row">
+      <div class="wday"><div class="wday-lbl">S</div><div class="wday-dot done">✓</div></div>
+      <div class="wday"><div class="wday-lbl">T</div><div class="wday-dot done">✓</div></div>
+      <div class="wday"><div class="wday-lbl">Q</div><div class="wday-dot done">✓</div></div>
+      <div class="wday"><div class="wday-lbl">Q</div><div class="wday-dot done">✓</div></div>
+      <div class="wday"><div class="wday-lbl">S</div><div class="wday-dot today">hoje</div></div>
+      <div class="wday"><div class="wday-lbl">S</div><div class="wday-dot"></div></div>
+      <div class="wday"><div class="wday-lbl">D</div><div class="wday-dot"></div></div>
+    </div>
+    <div id="limit-banner" style="display:none" class="limit-banner" onclick="goPaywall()">
+      <div class="limit-icon">⭐</div>
+      <div class="limit-info">
+        <p>Você usou suas 3 pausas grátis</p>
+        <p>Assine para acesso ilimitado</p>
+      </div>
+      <div class="limit-arrow">›</div>
+    </div>
+    <div class="hero-card" onclick="goCheckin()">
+      <div class="hero-card-glow"></div>
+      <div class="hero-orb"></div>
+      <div class="hero-tag">Pausa de hoje</div>
+      <div class="hero-title">Faça seu check-in<br>de bem-estar</div>
+      <button class="hero-btn" onclick="event.stopPropagation();goCheckin()">
+        Começar agora
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Seu humor esta semana</div>
+      <div class="mini-bars">
+        <div class="mini-bar filled" style="height:40%"></div>
+        <div class="mini-bar filled" style="height:60%"></div>
+        <div class="mini-bar filled" style="height:75%"></div>
+        <div class="mini-bar filled" style="height:55%"></div>
+        <div class="mini-bar today-bar" style="height:80%"></div>
+        <div class="mini-bar" style="height:8%"></div>
+        <div class="mini-bar" style="height:8%"></div>
+      </div>
+      <div class="mini-bar-labels">
+        <div class="mini-bar-lbl">S</div><div class="mini-bar-lbl">T</div><div class="mini-bar-lbl">Q</div>
+        <div class="mini-bar-lbl">Q</div><div class="mini-bar-lbl">S</div><div class="mini-bar-lbl">S</div><div class="mini-bar-lbl">D</div>
+      </div>
+    </div>
+    <div class="qa-title">Exercícios rápidos</div>
+    <div class="qa-grid">
+      <div class="qa-card" onclick="quickEx('respiracao')"><div class="qa-icon">🌬️</div><div class="qa-name">Respiração</div><div class="qa-dur">2 minutos</div></div>
+      <div class="qa-card" onclick="quickEx('gratidao')"><div class="qa-icon">🙏</div><div class="qa-name">Gratidão</div><div class="qa-dur">Reflexão rápida</div></div>
+      <div class="qa-card" onclick="quickEx('intencao')"><div class="qa-icon">🎯</div><div class="qa-name">Intenção</div><div class="qa-dur">Foco do dia</div></div>
+      <div class="qa-card" onclick="quickEx('corporal')"><div class="qa-icon">🧘</div><div class="qa-name">Corporal</div><div class="qa-dur">Relaxamento</div></div>
+    </div>
+  </div>
+
+  <!-- CHECKIN -->
+  <div id="s-checkin" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="goNav('s-home','nav-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Início
+      </button>
+      <div class="screen-ttl">Como você está<br>agora?</div>
+      <div class="screen-sub">Sem julgamento — apenas uma fotografia honesta do seu momento.</div>
+    </div>
+    <div class="section-lbl">Humor</div>
+    <div class="mood-row">
+      <button class="mood-btn" onclick="selMood(this,'muito mal','😔')">😔<span>péssimo</span></button>
+      <button class="mood-btn" onclick="selMood(this,'mal','😕')">😕<span>mal</span></button>
+      <button class="mood-btn" onclick="selMood(this,'neutro','😐')">😐<span>neutro</span></button>
+      <button class="mood-btn" onclick="selMood(this,'bem','🙂')">🙂<span>bem</span></button>
+      <button class="mood-btn" onclick="selMood(this,'muito bem','😄')">😄<span>ótimo</span></button>
+    </div>
+    <div class="section-lbl">Nível de energia</div>
+    <div class="energy-wrap">
+      <div class="energy-track">
+        <span class="energy-lbl">esgotado</span>
+        <input type="range" id="energia" min="1" max="10" value="5" oninput="document.getElementById('eval').textContent=this.value;updateHint(this.value)">
+        <span class="energy-val" id="eval">5</span>
+        <span class="energy-lbl">cheio</span>
+      </div>
+      <div class="energy-sub" id="energy-hint">energia moderada</div>
+    </div>
+    <div class="section-lbl">O que está presente agora?</div>
+    <div class="opts">
+      <div class="opt" onclick="togOpt(this)"><span class="opt-icon">⚡</span>Pensamentos acelerados / ansiedade</div>
+      <div class="opt" onclick="togOpt(this)"><span class="opt-icon">😴</span>Cansaço ou esgotamento</div>
+      <div class="opt" onclick="togOpt(this)"><span class="opt-icon">😞</span>Tristeza ou desânimo</div>
+      <div class="opt" onclick="togOpt(this)"><span class="opt-icon">🌀</span>Dificuldade de focar</div>
+      <div class="opt" onclick="togOpt(this)"><span class="opt-icon">😤</span>Irritação ou impaciência</div>
+      <div class="opt" onclick="togOpt(this)"><span class="opt-icon">☀️</span>Me sentindo bem — quero manter</div>
+    </div>
+    <div style="margin-top:24px">
+      <button class="btn btn-primary" id="btn-ci" onclick="gerarExercicio()">Criar minha pausa de hoje</button>
+      <button class="btn btn-ghost" onclick="goNav('s-home','nav-home')">Voltar</button>
+    </div>
+  </div>
+
+  <!-- EXERCICIO -->
+  <div id="s-exercicio" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="goTo('s-checkin')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Check-in
+      </button>
+      <div class="ex-tag-pill" id="ex-tag">exercício</div>
+      <div class="ex-ttl" id="ex-ttl">Carregando...</div>
+    </div>
+    <div class="ex-body-card" id="ex-body"></div>
+    <div id="breath-wrap" style="display:none">
+      <div class="breath-section">
+        <div class="breath-orb" id="breath-orb" onclick="startBreath()">toque para<br>começar</div>
+        <div class="breath-phase" id="breath-phase">Clique no orbe para iniciar</div>
+        <div class="breath-cycles" id="breath-cycles"></div>
+      </div>
+    </div>
+    <div id="reflect-wrap" style="display:none">
+      <div class="reflect-card">
+        <div class="reflect-q" id="reflect-q">Reflexão</div>
+        <textarea id="reflect-ans" placeholder="Escreva livremente, sem pressa..." rows="4"></textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="concluir()">Concluir pausa ✦</button>
+    <button class="btn btn-ghost" onclick="goTo('s-checkin')">Refazer check-in</button>
+  </div>
+
+  <!-- COMPLETO -->
+  <div id="s-completo" class="screen">
+    <div class="complete-area">
+      <div class="complete-orb">🌿</div>
+      <div class="complete-ttl">Pausa concluída</div>
+      <div class="complete-sub">Você dedicou um momento para si mesmo hoje. Isso importa muito mais do que parece.</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-card-icon">🔥</div>
+      <div class="streak-card-info">
+        <p>Sequência atual</p>
+        <p><span id="streak-final">1</span> dias consecutivos</p>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-lbl">Para você refletir</div>
+      <div class="insight-txt" id="insight-txt">...</div>
+    </div>
+    <button class="btn btn-primary" onclick="goNav('s-home','nav-home')">Voltar ao início</button>
+    <button class="btn btn-ghost" onclick="goNav('s-historico','nav-hist')">Ver meu histórico</button>
+  </div>
+
+  <!-- HISTORICO -->
+  <div id="s-historico" class="screen">
+    <div class="screen-header" style="margin-bottom:20px">
+      <div class="screen-ttl">Histórico</div>
+      <div class="screen-sub">Cada pausa registrada é um passo para frente.</div>
+    </div>
+    <div class="hist-list" id="hist-list">
+      <div class="hist-item"><div class="hist-emoji">😄</div><div class="hist-info"><div class="hist-date">Ontem · 08:12</div><div class="hist-note">Respiração guiada · energia 7/10</div></div><div class="hist-badge">ótimo</div></div>
+      <div class="hist-item"><div class="hist-emoji">😐</div><div class="hist-info"><div class="hist-date">Quarta · 07:45</div><div class="hist-note">Reflexão · energia 4/10</div></div><div class="hist-badge">neutro</div></div>
+      <div class="hist-item"><div class="hist-emoji">😕</div><div class="hist-info"><div class="hist-date">Terça · 09:03</div><div class="hist-note">Gratidão · energia 3/10</div></div><div class="hist-badge">mal</div></div>
+      <div class="hist-item"><div class="hist-emoji">🙂</div><div class="hist-info"><div class="hist-date">Segunda · 08:30</div><div class="hist-note">Intenção do dia · energia 6/10</div></div><div class="hist-badge">bem</div></div>
+    </div>
+  </div>
+
+  <!-- PAYWALL -->
+  <div id="s-paywall" class="paywall-screen">
+    <div class="paywall-badge">⭐ Serenity Premium</div>
+    <div class="paywall-title">Paz mental<br><em>sem limites</em></div>
+    <div class="paywall-sub">Desbloqueie acesso ilimitado a pausas personalizadas, histórico completo e muito mais.</div>
+    <div class="features-list">
+      <div class="feature-item"><div class="feature-check">✓</div>Pausas diárias ilimitadas com IA</div>
+      <div class="feature-item"><div class="feature-check">✓</div>Histórico completo de humor</div>
+      <div class="feature-item"><div class="feature-check">✓</div>Gráficos de evolução semanal</div>
+      <div class="feature-item"><div class="feature-check">✓</div>Exercícios exclusivos: hipnose e sono</div>
+      <div class="feature-item"><div class="feature-check">✓</div>Lembretes personalizados</div>
+      <div class="feature-item"><div class="feature-check">✓</div>Cancele quando quiser</div>
+    </div>
+    <div class="plan-cards">
+      <div class="plan-card popular selected" id="plan-anual" onclick="selPlan('anual')">
+        <div class="plan-popular-tag">MAIS POPULAR</div>
+        <div class="plan-name">Anual</div>
+        <div class="plan-price"><span class="plan-price-val">R$9</span><span class="plan-price-period">/mês</span></div>
+        <div class="plan-desc">Cobrado como R$107/ano</div>
+        <div class="plan-saving">Economize 53% vs mensal</div>
+      </div>
+      <div class="plan-card" id="plan-mensal" onclick="selPlan('mensal')">
+        <div class="plan-name">Mensal</div>
+        <div class="plan-price"><span class="plan-price-val">R$19</span><span class="plan-price-period">/mês</span></div>
+        <div class="plan-desc">Cobrado mensalmente</div>
+      </div>
+    </div>
+    <div class="trial-note">🎁 <strong>7 dias grátis</strong> — cancele a qualquer momento</div>
+    <button class="btn btn-gold" onclick="assinar()">Começar meu período grátis</button>
+    <button class="btn btn-ghost" onclick="goNav('s-home','nav-home')">Agora não</button>
+    <button class="restore-btn" onclick="alert('Compra restaurada! Funcionalidade real via Stripe.')">Restaurar compra</button>
+  </div>
+
+  <!-- PERFIL -->
+  <div id="s-perfil" class="screen">
+    <div class="profile-header">
+      <div class="profile-avatar-lg" id="profile-avatar-lg">👤</div>
+      <div class="profile-name" id="profile-name">Usuário</div>
+      <div class="profile-email" id="profile-email">—</div>
+      <div class="profile-plan free" id="profile-plan">✦ Plano Grátis</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="stat-dias">0</div><div class="stat-lbl">dias totais</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-streak">0</div><div class="stat-lbl">sequência</div></div>
+      <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">humor médio</div></div>
+    </div>
+    <div class="profile-section">Conta</div>
+    <div class="profile-item" onclick="goPaywall()">
+      <div class="profile-item-icon">⭐</div>
+      <div class="profile-item-label">Upgrade para Premium</div>
+      <div class="profile-item-arrow">›</div>
+    </div>
+    <div class="profile-item">
+      <div class="profile-item-icon">🔔</div>
+      <div class="profile-item-label">Lembretes diários</div>
+      <div class="profile-item-arrow">›</div>
+    </div>
+    <div class="profile-item">
+      <div class="profile-item-icon">🔒</div>
+      <div class="profile-item-label">Privacidade e dados</div>
+      <div class="profile-item-arrow">›</div>
+    </div>
+    <div class="profile-section">Suporte</div>
+    <div class="profile-item">
+      <div class="profile-item-icon">💬</div>
+      <div class="profile-item-label">Falar com suporte</div>
+      <div class="profile-item-arrow">›</div>
+    </div>
+    <div class="profile-item">
+      <div class="profile-item-icon">⭐</div>
+      <div class="profile-item-label">Avaliar o Serenity</div>
+      <div class="profile-item-arrow">›</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Sair da conta</button>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottom-nav" style="display:none">
+    <button class="nav-btn active" id="nav-home" onclick="goNav('s-home','nav-home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início
+    </button>
+    <button class="nav-btn" id="nav-ci" onclick="goNav('s-checkin','nav-ci')">
+      <div class="center-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      Pausa
+    </button>
+    <button class="nav-btn" id="nav-hist" onclick="goNav('s-historico','nav-hist')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Histórico
+    </button>
+    <button class="nav-btn" id="nav-perfil" onclick="goNav('s-perfil','nav-perfil')">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil
+    </button>
+  </div>
+</div>
+
+<script>
+// STATE
+let user = null, isPremium = false, freeUses = 0, streakCount = 0;
+let mood = '', moodEmoji = '', opts = [], currentInsight = '', selectedPlan = 'anual';
+let breathInterval = null, breathCount = 0;
+let _auth = null, _provider = null;
+
+// FIREBASE — inicializado via módulo abaixo
+function loginGoogle() {
+  if (!_auth || !_provider) { alert('Firebase ainda carregando, tente em 1 segundo.'); return; }
+  showLoad(true, 'Conectando com Google...');
+  import('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js').then(({ signInWithPopup }) => {
+    signInWithPopup(_auth, _provider)
+      .then(result => {
+        const u = result.user;
+        user = {
+          name: u.displayName || 'Usuário',
+          email: u.email || '',
+          photo: u.photoURL || null,
+          initials: (u.displayName || 'U').charAt(0).toUpperCase()
+        };
+        showLoad(false);
+        enterApp();
+      })
+      .catch(err => {
+        showLoad(false);
+        if (err.code !== 'auth/popup-closed-by-user') alert('Erro ao entrar: ' + err.message);
+      });
+  });
+}
+
+function loginGuest() {
+  user = { name: 'Visitante', email: '', photo: null, initials: '?' };
+  freeUses = 0;
+  enterApp();
+}
+
+function enterApp() {
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('bottom-nav').style.display = 'flex';
+  setTime();
+  updateUserUI();
+  goNav('s-home', 'nav-home');
+}
+
+function updateUserUI() {
+  if (!user) return;
+  const av = document.getElementById('user-avatar');
+  const avLg = document.getElementById('profile-avatar-lg');
+  if (user.photo) {
+    av.innerHTML = '<img src="' + user.photo + '" alt="' + user.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    avLg.innerHTML = '<img src="' + user.photo + '" alt="' + user.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+  } else {
+    av.textContent = user.initials;
+    avLg.textContent = user.initials;
+  }
+  document.getElementById('profile-name').textContent = user.name;
+  document.getElementById('profile-email').textContent = user.email || 'Conta de visitante';
+  document.getElementById('stat-dias').textContent = streakCount;
+  document.getElementById('stat-streak').textContent = streakCount;
+  document.getElementById('streak-num').textContent = streakCount;
+  updatePlanUI();
+}
+
+function updatePlanUI() {
+  const planEl = document.getElementById('profile-plan');
+  if (isPremium) {
+    planEl.textContent = '⭐ Premium';
+    planEl.classList.remove('free');
+    document.getElementById('limit-banner').style.display = 'none';
+  } else {
+    planEl.textContent = '✦ Plano Grátis';
+    planEl.classList.add('free');
+    if (freeUses >= 3) document.getElementById('limit-banner').style.display = 'flex';
+  }
+}
+
+function logout() {
+  if (!confirm('Tem certeza que quer sair?')) return;
+  if (window._firebaseSignOut) window._firebaseSignOut();
+  user = null; isPremium = false; freeUses = 0; streakCount = 0;
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'none';
+  document.getElementById('s-login').classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.paywall-screen').forEach(s => s.classList.remove('active'));
+}
+
+// NAV
+function goTo(id) {
+  document.querySelectorAll('.screen, .paywall-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goNav(screenId, navId) {
+  goTo(screenId);
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById(navId);
+  if (nb) nb.classList.add('active');
+}
+
+function goCheckin() {
+  if (!isPremium && freeUses >= 3) { goPaywall(); return; }
+  goNav('s-checkin', 'nav-ci');
+}
+
+function goPaywall() { goTo('s-paywall'); }
+
+// PAYWALL
+function selPlan(plan) {
+  selectedPlan = plan;
+  document.getElementById('plan-anual').classList.toggle('selected', plan === 'anual');
+  document.getElementById('plan-mensal').classList.toggle('selected', plan === 'mensal');
+}
+
+function assinar() {
+  const links = {
+    mensal: 'https://buy.stripe.com/test_28E14pc4a2SV1Vo5K24Vy00',
+    anual:  'https://buy.stripe.com/test_6oUcN72tAaln8jM2xQ4Vy02'
+  };
+  window.open(links[selectedPlan], '_blank');
+    goNav('s-home', 'nav-home');
+  }, 1500);
+}
+
+// CHECKIN
+function setTime() {
+  const h = new Date().getHours();
+  const el = document.getElementById('home-time');
+  if (el) el.textContent = h < 12 ? 'bom dia' : h < 18 ? 'boa tarde' : 'boa noite';
+}
+
+function selMood(btn, m, emoji) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  mood = m; moodEmoji = emoji;
+}
+
+function togOpt(el) {
+  el.classList.toggle('sel');
+  opts = [...document.querySelectorAll('.opt.sel')].map(e => e.textContent.trim());
+}
+
+function updateHint(v) {
+  const hints = ['','esgotado','muito cansado','cansado','pouco cansado','energia moderada','razoável','boa energia','energia alta','cheio de energia','no pico'];
+  document.getElementById('energy-hint').textContent = hints[v] || '';
+}
+
+function showLoad(show, txt) {
+  document.getElementById('loading-txt').textContent = txt || 'Preparando...';
+  document.getElementById('loading').classList.toggle('visible', show);
+}
+
+async function gerarExercicio() {
+  if (!mood) { alert('Selecione como você está.'); return; }
+  if (!isPremium && freeUses >= 3) { goPaywall(); return; }
+  const energia = document.getElementById('energia').value;
+  showLoad(true, 'Criando sua pausa personalizada...');
+  await callIA(`Estado: ${mood}\nEnergia: ${energia}/10\nPresente: ${opts.length > 0 ? opts.join(', ') : 'nada específico'}`);
+}
+
+async function quickEx(tipo) {
+  if (!isPremium && freeUses >= 3) { goPaywall(); return; }
+  mood = 'neutro'; moodEmoji = '😐';
+  showLoad(true, 'Preparando exercício...');
+  const nomes = { respiracao:'respiração guiada', gratidao:'gratidão', intencao:'intenção do dia', corporal:'relaxamento corporal' };
+  await callIA(`Tipo solicitado: ${nomes[tipo]}\nEnergia: 5/10\nPresente: nada específico`);
+}
+
+async function callIA(context) {
+  const prompt = `Você é um assistente de bem-estar mental acolhedor. Crie um exercício de 2-3 minutos.
+
+${context}
+
+Responda SOMENTE em JSON válido, sem markdown:
+{
+  "tipo": "respiracao" ou "reflexao" ou "gratidao" ou "intencao" ou "corporal",
+  "tag": "nome curto do exercício",
+  "titulo": "título acolhedor e poético até 8 palavras",
+  "texto": "instrução completa em tom suave (5-7 linhas com quebras naturais)",
+  "pergunta": "se reflexao/gratidao/intencao: pergunta central. Se respiracao/corporal: deixe vazio.",
+  "insight": "mensagem de encerramento personalizada (2-3 linhas, poética e acolhedora)"
+}`;
+  try {
+    const r = await fetch('/api/gerar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erro');
+    renderEx(JSON.parse(d.text.replace(/```json|```/g,'').trim()));
+    freeUses++;
+    updatePlanUI();
+  } catch(e) { showLoad(false); alert('Erro ao conectar. Tente novamente.'); }
+}
+
+function renderEx(p) {
+  document.getElementById('ex-tag').textContent = p.tag;
+  document.getElementById('ex-ttl').textContent = p.titulo;
+  document.getElementById('ex-body').textContent = p.texto;
+  currentInsight = p.insight;
+  document.getElementById('breath-wrap').style.display = (p.tipo === 'respiracao' || p.tipo === 'corporal') ? 'block' : 'none';
+  const rw = document.getElementById('reflect-wrap');
+  if (['reflexao','gratidao','intencao'].includes(p.tipo) && p.pergunta) {
+    rw.style.display = 'block';
+    document.getElementById('reflect-q').textContent = p.pergunta;
+    document.getElementById('reflect-ans').value = '';
+  } else { rw.style.display = 'none'; }
+  if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
+  const orb = document.getElementById('breath-orb');
+  orb.classList.remove('expand');
+  orb.innerHTML = 'toque para<br>começar';
+  document.getElementById('breath-phase').textContent = 'Clique no orbe para iniciar';
+  document.getElementById('breath-cycles').textContent = '';
+  breathCount = 0;
+  showLoad(false);
+  goTo('s-exercicio');
+}
+
+function startBreath() {
+  if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
+  breathCount = 0;
+  const orb = document.getElementById('breath-orb');
+  const phase = document.getElementById('breath-phase');
+  const cyc = document.getElementById('breath-cycles');
+  const phases = [
+    { txt:'inspire...', lbl:'Inspire pelo nariz — 4 segundos', ex:true },
+    { txt:'segure...', lbl:'Segure o ar — 4 segundos', ex:true },
+    { txt:'expire...', lbl:'Expire pela boca — 6 segundos', ex:false },
+  ];
+  let i = 0;
+  function next() {
+    const p = phases[i % 3];
+    orb.innerHTML = p.txt; phase.textContent = p.lbl;
+    orb.classList.toggle('expand', p.ex);
+    if (i % 3 === 2) breathCount++;
+    cyc.textContent = breathCount > 0 ? `${breathCount} ciclo${breathCount > 1 ? 's' : ''} completo${breathCount > 1 ? 's' : ''}` : '';
+    i++;
+  }
+  next(); breathInterval = setInterval(next, 4800);
+}
+
+function concluir() {
+  if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
+  streakCount++;
+  document.getElementById('streak-num').textContent = streakCount;
+  document.getElementById('streak-final').textContent = streakCount;
+  document.getElementById('stat-dias').textContent = streakCount;
+  document.getElementById('stat-streak').textContent = streakCount;
+  document.getElementById('insight-txt').textContent = currentInsight || 'Cada pausa é um passo em direção ao equilíbrio que você merece.';
+  const lista = document.getElementById('hist-list');
+  const item = document.createElement('div');
+  item.className = 'hist-item';
+  item.innerHTML = `<div class="hist-emoji">${moodEmoji || '🙂'}</div><div class="hist-info"><div class="hist-date">Hoje · ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div><div class="hist-note">${document.getElementById('ex-tag').textContent} · energia ${document.getElementById('energia')?.value || 5}/10</div></div><div class="hist-badge">${mood || 'bem'}</div>`;
+  lista.insertBefore(item, lista.firstChild);
+  goTo('s-completo');
+}
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCI9RRgsr7QwGo-Ipe5doaDGGlkytUPSB0",
+  authDomain: "serenity-33113.firebaseapp.com",
+  projectId: "serenity-33113",
+  storageBucket: "serenity-33113.firebasestorage.app",
+  messagingSenderId: "384240158630",
+  appId: "1:384240158630:web:c019bb8fb1de30463bf167"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+_auth = auth;
+_provider = provider;
+
+window._firebaseSignOut = () => signOut(auth);
+
+onAuthStateChanged(auth, (u) => {
+  if (u && !user) {
+    user = {
+      name: u.displayName || 'Usuário',
+      email: u.email || '',
+      photo: u.photoURL || null,
+      initials: (u.displayName || 'U').charAt(0).toUpperCase()
+    };
+    enterApp();
+  }
+});
+</script>
+</body>
+</html>
