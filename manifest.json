@@ -1,0 +1,26 @@
+{
+  "name": "Serenity — paz mental diária",
+  "short_name": "Serenity",
+  "description": "Sua pausa diária de bem-estar, personalizada pela inteligência artificial.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D0F1A",
+  "theme_color": "#8B7FF0",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/svg?seed=serenity&backgroundColor=8B7FF0&size=192",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/svg?seed=serenity&backgroundColor=8B7FF0&size=512",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle"],
+  "lang": "pt-BR"
+}
