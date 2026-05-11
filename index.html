@@ -652,14 +652,11 @@ function selPlan(plan) {
 }
 
 function assinar() {
-  showLoad(true, 'Abrindo pagamento seguro...');
-  setTimeout(() => {
-    showLoad(false);
-    isPremium = true;
-    updatePlanUI();
-    document.getElementById('profile-plan').textContent = '⭐ Premium';
-    document.getElementById('profile-plan').classList.remove('free');
-    alert('✅ Assinatura ativada!\n\nNa versão real, aqui abriria o checkout do Stripe com pagamento por cartão ou Pix.\n\nO usuário seria cobrado R$' + (selectedPlan === 'anual' ? '107/ano' : '19/mês') + ' após os 7 dias grátis.');
+  const links = {
+    mensal: 'https://buy.stripe.com/test_28E14pc4a2SV1Vo5K24Vy00',
+    anual:  'https://buy.stripe.com/test_6oUcN72tAaln8jM2xQ4Vy02'
+  };
+  window.open(links[selectedPlan], '_blank');
     goNav('s-home', 'nav-home');
   }, 1500);
 }
@@ -723,14 +720,14 @@ Responda SOMENTE em JSON válido, sem markdown:
   "insight": "mensagem de encerramento personalizada (2-3 linhas, poética e acolhedora)"
 }`;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch('/api/gerar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 900, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ prompt })
     });
     const d = await r.json();
-    const raw = d.content?.find(b => b.type === 'text')?.text || '';
-    renderEx(JSON.parse(raw.replace(/```json|```/g,'').trim()));
+    if (!r.ok) throw new Error(d.error || 'Erro');
+    renderEx(JSON.parse(d.text.replace(/```json|```/g,'').trim()));
     freeUses++;
     updatePlanUI();
   } catch(e) { showLoad(false); alert('Erro ao conectar. Tente novamente.'); }
